@@ -2,9 +2,8 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import { getVSCodeConfig } from "./config";
-import { Trigger } from "./trigger_enum";
+// import { Trigger } from "./trigger_enum";
 import * as constants from './constants';
-import { Console } from 'console';
 
 const vscodeConfig = getVSCodeConfig();
 
