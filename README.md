@@ -1,10 +1,14 @@
-# alog-code-generator README
+# Alog log-code generator
 
-Alog code generator provides a vscode extension capability to automatically generate, suggest / insert log code.
+Alog code generator provides a vscode extension capability to automatically generate, suggest / insert log code as used by [alchemy-logging](https://github.com/IBM/alchemy-logging) library.
 
 ## Features
 
-1. Provides easy way of completing 6 digit log code along with level suffix on pressing `cmd+a` for mac and `ctrl+a` for windows/linux systems.
+1. Provides easy way of generating 6 digit log code along with log-level suffix on pressing `cmd+shift+a` for mac and `ctrl+shift++a` for windows/linux systems.
+2. Based on the line being written, alog code generator automatically figures out the level of the log code and assigns suffix to the log code. For example:
+   1. `log.info` -> `I`
+   2. `error.type_check` -> `E`
+   3. `log.error` -> `E`
 
 ## Requirements
 
@@ -37,6 +41,9 @@ coming soon.
 
 ## Release Notes
 
+### 0.0.1
+- Provides log code completion with press of `cmd+shift+a` command on mac and `ctrl+shift+a` on windows/linux
+- Automatic resolution of log level, based on the line being written.
 
 -----------------------------------------------------------------------------------------------------------
 ## Following extension guidelines
