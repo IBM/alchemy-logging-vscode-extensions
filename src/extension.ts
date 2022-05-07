@@ -40,7 +40,6 @@ export function activate(context: vscode.ExtensionContext): void {
 	// Get log code via command
 	registerCommandNice("extension.log_code", (args) => {
 
-		vscode.window.showInformationMessage("Alog code generator invoked");
 		const activeEditor = vscode.window.activeTextEditor;
 		const searchWindow = 10;
 		const startPosition: number = 0;
@@ -50,22 +49,17 @@ export function activate(context: vscode.ExtensionContext): void {
 		var logCodeSuffix: string | undefined;
 
 		if (activeEditor) {
-			vscode.window.showInformationMessage("editor is active");
 			lineNumber = activeEditor.selection.active.line;
 			activePosition = activeEditor.selection.active.character;
 			rawLineText = activeEditor.document.lineAt(activeEditor.selection.active.line).text.trimStart();
 
-			vscode.window.showInformationMessage(`rawLineText: ${rawLineText}`)
 			const levelPatternMatch: RegExpMatchArray | null  = errorFirstRegex.exec(rawLineText) || logFirstRegex.exec(rawLineText);
-			vscode.window.showInformationMessage(`Pattern matching results: ${levelPatternMatch}`);
 			if (levelPatternMatch != null && levelPatternMatch?.length > 0) {
 				const matchedCapture = levelPatternMatch[1];
 				const logCodeSuffix = constants.pythonLogKeywords.get(matchedCapture);
-				vscode.window.showInformationMessage(`Suffix: ${logCodeSuffix}`);
 				if (logCodeSuffix != undefined) {
 					const logCodeNumber = generate(digitCount);
 					const suggestedLogCode = logCodeNumber + logCodeSuffix;
-					vscode.window.showInformationMessage(`suggestedLogCode: ${suggestedLogCode}`);
 					activeEditor.edit(editBuilder => {
 						editBuilder.insert(new vscode.Position(lineNumber, activePosition), suggestedLogCode)
 					})
