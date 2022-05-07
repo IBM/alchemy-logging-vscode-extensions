@@ -3,6 +3,7 @@
   "displayName": "Alog-Code Generator",
   "description": "Automatic log code generator",
   "version": "0.0.1",
+  "publisher": "Gaurav Kumbhat",
   "engines": {
     "vscode": "^1.65.0"
   },
@@ -10,22 +11,21 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:alog-code-generator.log_code",
-    "onCommand:extension.log_code"
+    "onLanguage:python"
   ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "alog-code-generator.log_code",
+        "command": "extension.log_code",
         "title": "Alog Code Generator"
       }
     ],
     "keybindings": [
       {
         "command": "extension.log_code",
-        "key": "ctrl+a",
-        "mac": "cmd+a",
+        "key": "ctrl+shift+a",
+        "mac": "cmd+shift+a",
         "when": "editorTextFocus"
       }
     ]

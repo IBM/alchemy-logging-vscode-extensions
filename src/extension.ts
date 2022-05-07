@@ -11,14 +11,20 @@ const vscodeConfig = getVSCodeConfig();
 const digitCount = 6;
 
 
-const errorFirstRegex = new RegExp('(error)\..+\\(\"', 'gs');
-const logFirstRegex = new RegExp("^log\.([a-z]{4,7}[1-5]?)\\(\"", "gs");
+const errorFirstRegex = new RegExp('(error)\..+\\(\"[A-Z]{3}', 'gs');
+const logFirstRegex = new RegExp("^log\.([a-z]{4,7}[1-5]?)\\(\"[A-Z]{3}", "gs");
+
+// For phase 1, i.e with no prefix configuration, we are adding
+// prefix consideration in the regex itself
+// Once prefix configuration is added, uncomment following regexes
+// const errorFirstRegex = new RegExp('(error)\..+\\(\"', 'gs');
+// const logFirstRegex = new RegExp("^log\.([a-z]{4,7}[1-5]?)\\(\"", "gs");
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext): void {
 	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "alog-code-generator" is now active!');
+	// console.log('Congratulations, your extension "alog-code-generator" is now active!');
 
 	function registerCommandNice(commandId: string, run: (...args: any[]) => void): void {
 		context.subscriptions.push(vscode.commands.registerCommand(commandId, run));
@@ -34,6 +40,7 @@ export function activate(context: vscode.ExtensionContext): void {
 	// Get log code via command
 	registerCommandNice("extension.log_code", (args) => {
 
+		vscode.window.showInformationMessage("Alog code generator invoked");
 		const activeEditor = vscode.window.activeTextEditor;
 		const searchWindow = 10;
 		const startPosition: number = 0;
@@ -43,18 +50,22 @@ export function activate(context: vscode.ExtensionContext): void {
 		var logCodeSuffix: string | undefined;
 
 		if (activeEditor) {
+			vscode.window.showInformationMessage("editor is active");
 			lineNumber = activeEditor.selection.active.line;
 			activePosition = activeEditor.selection.active.character;
-			rawLineText = activeEditor.document.lineAt(activeEditor.selection.active.line).text;
+			rawLineText = activeEditor.document.lineAt(activeEditor.selection.active.line).text.trimStart();
 
+			vscode.window.showInformationMessage(`rawLineText: ${rawLineText}`)
 			const levelPatternMatch: RegExpMatchArray | null  = errorFirstRegex.exec(rawLineText) || logFirstRegex.exec(rawLineText);
-
+			vscode.window.showInformationMessage(`Pattern matching results: ${levelPatternMatch}`);
 			if (levelPatternMatch != null && levelPatternMatch?.length > 0) {
 				const matchedCapture = levelPatternMatch[1];
 				const logCodeSuffix = constants.pythonLogKeywords.get(matchedCapture);
+				vscode.window.showInformationMessage(`Suffix: ${logCodeSuffix}`);
 				if (logCodeSuffix != undefined) {
 					const logCodeNumber = generate(digitCount);
 					const suggestedLogCode = logCodeNumber + logCodeSuffix;
+					vscode.window.showInformationMessage(`suggestedLogCode: ${suggestedLogCode}`);
 					activeEditor.edit(editBuilder => {
 						editBuilder.insert(new vscode.Position(lineNumber, activePosition), suggestedLogCode)
 					})

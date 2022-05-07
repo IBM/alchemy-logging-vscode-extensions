@@ -27,6 +27,13 @@ coming soon.
 3. Install package and depdendencies: `npm install`
 4. Create extension package: `vsce package`
 
+### Installation
+1. Open command menu: `Cmd+shift+p`
+2. Select `Extension: Install Extensions`
+3. On the left hand side extension panel, click on three horizontal dots, `...`
+4. Select `Install from VSIX`
+5. Find path to above generated `.vsix` file and install the package.
+6. Enjoy extension!
 
 ## Release Notes
 
