@@ -11,8 +11,8 @@ const vscodeConfig = getVSCodeConfig();
 const digitCount = 6;
 
 
-const errorFirstRegex = new RegExp('(error)\..+\\(\"[A-Z]{3}', 'gs');
-const logFirstRegex = new RegExp("^log\.([a-z]{4,7}[1-5]?)\\(\"[A-Z]{3}", "gs");
+const errorFirstRegex = new RegExp('(error)\..+\\(\"(?:[A-Z]?|[A-Z]{3})', 'gs');
+const logFirstRegex = new RegExp("^log\.([a-z]{4,7}[1-5]?)\\(\"(?:[A-Z]?|[A-Z]{3})", "gs");
 
 // For phase 1, i.e with no prefix configuration, we are adding
 // prefix consideration in the regex itself
@@ -20,13 +20,16 @@ const logFirstRegex = new RegExp("^log\.([a-z]{4,7}[1-5]?)\\(\"[A-Z]{3}", "gs");
 // const errorFirstRegex = new RegExp('(error)\..+\\(\"', 'gs');
 // const logFirstRegex = new RegExp("^log\.([a-z]{4,7}[1-5]?)\\(\"", "gs");
 
+let logCodePrefixDefault: string = "<UNK>"
+const prefixCheckRegex = new RegExp('([A-Z]{3})', 'gs');
+
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext): void {
   // This line of code will only be executed once when your extension is activated
   // console.log('Congratulations, your extension "alog-code-generator" is now active!');
 
-  function registerCommandNice(commandId: string, run: (...args: any[]) => void): void {
+  function registerCommandNice(commandId: string, run: any): void {
 	  context.subscriptions.push(vscode.commands.registerCommand(commandId, run));
   }
 
@@ -38,37 +41,7 @@ export function activate(context: vscode.ExtensionContext): void {
 	// });
 
 	// Get log code via command
-	registerCommandNice("extension.log_code", (args) => {
-
-		const activeEditor = vscode.window.activeTextEditor;
-		const searchWindow = 10;
-		const startPosition: number = 0;
-		let lineNumber: number;
-		let rawLineText: string;
-		let activePosition: number;
-		let logCodeSuffix: string | undefined;
-
-		if (activeEditor) {
-			lineNumber = activeEditor.selection.active.line;
-			activePosition = activeEditor.selection.active.character;
-			rawLineText = activeEditor.document.lineAt(activeEditor.selection.active.line).text.trimStart();
-
-			const levelPatternMatch: RegExpMatchArray | null =
-				errorFirstRegex.exec(rawLineText) || logFirstRegex.exec(rawLineText);
-
-			if (levelPatternMatch !== null && levelPatternMatch?.length > 0) {
-				const matchedCapture = levelPatternMatch[1];
-				logCodeSuffix = constants.pythonLogKeywords.get(matchedCapture);
-				if (logCodeSuffix !== undefined) {
-					const logCodeNumber = generate(digitCount);
-					const suggestedLogCode = logCodeNumber + logCodeSuffix;
-					activeEditor.edit(editBuilder => {
-						editBuilder.insert(new vscode.Position(lineNumber, activePosition), suggestedLogCode)
-					})
-				}
-			}
-		}
-	});
+	registerCommandNice("extension.log_code", insertLogCode);
 
 	// NOTE: Auto suggest functinality will be in phase 2
 	// let autoSuggestor = vscode.languages.registerCompletionItemProvider(
@@ -115,6 +88,87 @@ async function provideCompletionItems(
 		return new vscode.CompletionList([completionItem], true);
 	}
 	return new vscode.CompletionList([], true);
+}
+
+// Log code insertion
+/**
+ * Function to insert appropriate log code at the active cursor position
+ * if applicable, i.e if the code determines that this is a log line being written
+ * @param args any (not used currently)
+ */
+function insertLogCode(args: any): void {
+
+	const activeEditor = vscode.window.activeTextEditor;
+	const searchWindow = 10;
+	const startPosition: number = 0;
+	let lineNumber: number;
+	let rawLineText: string;
+	let activePosition: vscode.Position;
+	let logCodeSuffix: string | undefined;
+
+	if (activeEditor) {
+		lineNumber = activeEditor.selection.active.line;
+		activePosition = activeEditor.selection.active;
+		rawLineText = activeEditor.document.lineAt(activeEditor.selection.active.line).text.trimStart();
+
+		const levelPatternMatch: RegExpMatchArray | null =
+			errorFirstRegex.exec(rawLineText) || logFirstRegex.exec(rawLineText);
+
+		if (levelPatternMatch !== null && levelPatternMatch?.length > 0) {
+			const matchedCapture = levelPatternMatch[1];
+			logCodeSuffix = constants.pythonLogKeywords.get(matchedCapture);
+			if (logCodeSuffix !== undefined) {
+				const logCodeNumber = generate(digitCount);
+				let suggestedLogCode = logCodeNumber + logCodeSuffix;
+
+				const logCodePrefix = checkPrefixEntered(activeEditor, activePosition);
+				// TODO: Get prefix from the configuration
+				if (! logCodePrefix) {
+					// if prefix is not entered, lets add one
+					suggestedLogCode = logCodePrefixDefault + suggestedLogCode;
+				}
+
+				activeEditor.edit(editBuilder => {
+					editBuilder.insert(activePosition, suggestedLogCode)
+				})
+			}
+		}
+	}
+}
+
+/**
+ * Check if the prefix is already entered by the user or not
+ * @param activeEditor
+ * @param activePosition
+ * @returns boolean: True if already entered else false
+ */
+function checkPrefixEntered(activeEditor: vscode.TextEditor, activePosition: vscode.Position): string | null {
+
+	// TODO: Add test to check if this gives expected responses for:
+	// 	("<UNK>
+	// 	"<UNK>
+	// 	ABC
+	// 	("ABC"
+
+	// Get last 3 chars
+	const lastThreeCharPosition = new vscode.Position(
+		activePosition.line,
+		activePosition.character - 3);
+	const lastThreeChars: string = activeEditor.document.getText(
+		new vscode.Range(
+			lastThreeCharPosition,
+			activePosition
+		)
+	)
+
+	const prefixMatch = prefixCheckRegex.exec(lastThreeChars);
+
+	if (prefixMatch !== null) {
+		// Prefix exist
+		return prefixMatch[0]
+	}
+
+	return null;
 }
 
 function generate(n: number): string {
