@@ -14,6 +14,8 @@ const digitCount = 6;
 const errorFirstRegex = new RegExp('(error)\..+\\(\"(?:[A-Z]?|[A-Z]{3})', 'gs');
 const logFirstRegex = new RegExp("^log\.([a-z]{4,7}[1-5]?)\\(\"(?:[A-Z]?|[A-Z]{3})", "gs");
 
+const prefixCheckRegex = new RegExp('([A-Z]{3})', 'gs');
+
 // For phase 1, i.e with no prefix configuration, we are adding
 // prefix consideration in the regex itself
 // Once prefix configuration is added, uncomment following regexes
@@ -21,7 +23,6 @@ const logFirstRegex = new RegExp("^log\.([a-z]{4,7}[1-5]?)\\(\"(?:[A-Z]?|[A-Z]{3
 // const logFirstRegex = new RegExp("^log\.([a-z]{4,7}[1-5]?)\\(\"", "gs");
 
 let logCodePrefixDefault: string = "<UNK>"
-const prefixCheckRegex = new RegExp('([A-Z]{3})', 'gs');
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
