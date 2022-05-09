@@ -206,7 +206,7 @@ function generate(n: number): string {
 		value: '',
 		placeHolder: 'For example: ABC',
 		validateInput: text => {
-			vscode.window.showInformationMessage(`Validating: ${text}`);
+			// vscode.window.showInformationMessage(`Validating: ${text}`);
 			return text.length != 3 ? errorMessage : null;
 		}
 	});
