@@ -11,16 +11,19 @@ const vscodeConfig = getVSCodeConfig();
 // NOTE: Can be added to global config
 const digitCount = 6;
 
-let logCodePrefixDefault: string = "<UNK>"
+let logCodePrefixDefault: string = "<UNK>";
+const logCodePrefixKey: string = "logCodePrefix";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext): void {
-  // This line of code will only be executed once when your extension is activated
-  // console.log('Congratulations, your extension "alog-code-generator" is now active!');
 
-  function registerCommandNice(commandId: string, run: any): void {
-	  context.subscriptions.push(vscode.commands.registerCommand(commandId, run));
+  // As soon as the extension is activated, configure the workspace state
+  // with default logCodePrefix
+  context.workspaceState.update('logCodePrefix', logCodePrefixDefault);
+
+  function registerCommandNice(commandId: string, run: any, ): void {
+	  context.subscriptions.push(vscode.commands.registerCommand(commandId, run, [context]));
   }
 
   // The command has been defined in the package.json file
@@ -31,10 +34,10 @@ export function activate(context: vscode.ExtensionContext): void {
 	// });
 
     // Configure log code prefix
-  	registerCommandNice("extension.config_log_code_prefix", configLogCodePrefix);
+  	registerCommandNice("extension.config_log_code_prefix", () => {configLogCodePrefix(context)});
 
 	// Get log code via command
-	registerCommandNice("extension.log_code", insertLogCode);
+	registerCommandNice("extension.log_code",  () => {insertLogCode(context)});
 
 	// NOTE: Auto suggest functinality will be in phase 2
 	// let autoSuggestor = vscode.languages.registerCompletionItemProvider(
@@ -91,7 +94,7 @@ async function provideCompletionItems(
  * if applicable, i.e if the code determines that this is a log line being written
  * @param args any (not used currently)
  */
-async function insertLogCode(args: any): Promise<void> {
+async function insertLogCode(context: vscode.ExtensionContext): Promise<void> {
 
 	const activeEditor = vscode.window.activeTextEditor;
 	const searchWindow = 10;
@@ -116,11 +119,11 @@ async function insertLogCode(args: any): Promise<void> {
 				const logCodeNumber = generate(digitCount);
 				let suggestedLogCode = logCodeNumber + logCodeSuffix;
 
-				const logCodePrefix = checkPrefixEntered(activeEditor, activePosition);
-				// TODO: Get prefix from the configuration
+				let logCodePrefix: string | null | undefined = checkPrefixEntered(activeEditor, activePosition);
 				if (! logCodePrefix) {
-					// if prefix is not entered, lets add one
-					suggestedLogCode = logCodePrefixDefault + suggestedLogCode;
+					// if prefix is not entered, lets add one from workspace state
+					logCodePrefix = context.workspaceState.get(logCodePrefixKey);
+					suggestedLogCode = logCodePrefix + suggestedLogCode;
 				}
 
 				activeEditor.edit(editBuilder => {
@@ -134,11 +137,13 @@ async function insertLogCode(args: any): Promise<void> {
 /**
  * Function to take log code prefix as an input from user and
  * save it in workspaceState
- * @param args
+ * @param vscode.ExtensionContext
  */
-function configLogCodePrefix(args: any): void {
-	const quickPick = vscode.window.createQuickPick();
+ async function configLogCodePrefix(context: vscode.ExtensionContext): Promise<void> {
+	await showInputBox(context);
 }
+
+// ***************************** Utility Functions *****************************
 
 /**
  * Check if the prefix is already entered by the user or not
@@ -189,4 +194,26 @@ function generate(n: number): string {
 	const genNumber = Math.floor(Math.random() * (max - min + 1)) + min;
 
 	return ("" + genNumber).substring(add);
+}
+
+/**
+ * Shows an input box using window.showInputBox().
+ */
+ export async function showInputBox(context: vscode.ExtensionContext) {
+
+	const errorMessage: string = 'Incorrect length. The prefix should be of 3 characters!';
+	const result: string | undefined = await vscode.window.showInputBox({
+		value: '',
+		placeHolder: 'For example: ABC',
+		validateInput: text => {
+			vscode.window.showInformationMessage(`Validating: ${text}`);
+			return text.length != 3 ? errorMessage : null;
+		}
+	});
+	// Store the configured value in workspace state
+	if (result) {
+		context.workspaceState.update('logCodePrefix', result);
+	}
+
+	vscode.window.showInformationMessage(`Configured '${result}' as log code prefix for this project!`);
 }
