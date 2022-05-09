@@ -41,6 +41,9 @@ export function activate(context: vscode.ExtensionContext): void {
 	// 	vscode.window.showInformationMessage("");
 	// });
 
+    // Configure log code prefix
+  	registerCommandNice("extension.config_log_code_prefix", configLogCodePrefix);
+
 	// Get log code via command
 	registerCommandNice("extension.log_code", insertLogCode);
 
@@ -55,7 +58,9 @@ export function activate(context: vscode.ExtensionContext): void {
 }
 
 // this method is called when your extension is deactivated
-export function deactivate() { }
+export function deactivate() {
+	// TODO: Cleanup state
+ }
 
 // Log code generator function
 async function provideCompletionItems(
@@ -97,7 +102,7 @@ async function provideCompletionItems(
  * if applicable, i.e if the code determines that this is a log line being written
  * @param args any (not used currently)
  */
-function insertLogCode(args: any): void {
+async function insertLogCode(args: any): Promise<void> {
 
 	const activeEditor = vscode.window.activeTextEditor;
 	const searchWindow = 10;
@@ -135,6 +140,15 @@ function insertLogCode(args: any): void {
 			}
 		}
 	}
+}
+
+/**
+ * Function to take log code prefix as an input from user and
+ * save it in workspaceState
+ * @param args
+ */
+function configLogCodePrefix(args: any): void {
+	const quickPick = vscode.window.createQuickPick();
 }
 
 /**

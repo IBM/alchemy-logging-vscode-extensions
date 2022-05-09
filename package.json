@@ -17,8 +17,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "extension.log_code",
-        "title": "Alog Code Generator"
+        "command": "extension.config_log_code_prefix",
+        "title": "Configure Alog Code Generator"
       }
     ],
     "keybindings": [
