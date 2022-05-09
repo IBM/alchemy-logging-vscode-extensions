@@ -15,3 +15,5 @@ All notable changes to the "alog-code-generator" extension will be documented in
 
 - 0.2.0
   - Allow workspace level configuration of log code prefix using vscode command palate
+- 0.2.1
+  - Add support for `error("` pattern for python
