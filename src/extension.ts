@@ -1,6 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import { errorFirstRegex, logFirstRegex, prefixCheckRegex } from "./regex/python";
 import { getVSCodeConfig } from "./config";
 // import { Trigger } from "./trigger_enum";
 import * as constants from './constants';
@@ -9,18 +10,6 @@ const vscodeConfig = getVSCodeConfig();
 
 // NOTE: Can be added to global config
 const digitCount = 6;
-
-
-const errorFirstRegex = new RegExp('(error)\..+\\(\"(?:[A-Z]?|[A-Z]{3})', 'gs');
-const logFirstRegex = new RegExp("^log\.([a-z]{4,7}[1-5]?)\\(\"(?:[A-Z]?|[A-Z]{3})", "gs");
-
-const prefixCheckRegex = new RegExp('([A-Z]{3})', 'gs');
-
-// For phase 1, i.e with no prefix configuration, we are adding
-// prefix consideration in the regex itself
-// Once prefix configuration is added, uncomment following regexes
-// const errorFirstRegex = new RegExp('(error)\..+\\(\"', 'gs');
-// const logFirstRegex = new RegExp("^log\.([a-z]{4,7}[1-5]?)\\(\"", "gs");
 
 let logCodePrefixDefault: string = "<UNK>"
 
