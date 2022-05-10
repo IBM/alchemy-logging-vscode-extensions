@@ -11,7 +11,7 @@ const vscodeConfig = getVSCodeConfig();
 // NOTE: Can be added to global config
 const digitCount = 6;
 
-let logCodePrefixDefault: string = "<UNK>";
+let logCodePrefixDefault: string = "$UNK$";
 const logCodePrefixKey: string = "logCodePrefix";
 
 // this method is called when your extension is activated
@@ -117,13 +117,15 @@ async function insertLogCode(context: vscode.ExtensionContext): Promise<void> {
 			logCodeSuffix = constants.pythonLogKeywords.get(matchedCapture);
 			if (logCodeSuffix !== undefined) {
 				const logCodeNumber = generate(digitCount);
-				let suggestedLogCode = logCodeNumber + logCodeSuffix;
+				// NOTE: There is a > suffix added in below line
+				let suggestedLogCode = `${logCodeNumber + logCodeSuffix}>`;
 
 				let logCodePrefix: string | null | undefined = checkPrefixEntered(activeEditor, activePosition);
 				if (! logCodePrefix) {
 					// if prefix is not entered, lets add one from workspace state
 					logCodePrefix = context.workspaceState.get(logCodePrefixKey);
-					suggestedLogCode = logCodePrefix + suggestedLogCode;
+					// NOTE: There is a < prefix added in below line
+					suggestedLogCode = `<${logCodePrefix}${suggestedLogCode}`;
 				}
 
 				activeEditor.edit(editBuilder => {

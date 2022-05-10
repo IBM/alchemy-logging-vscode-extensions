@@ -17,3 +17,6 @@ All notable changes to the "alog-code-generator" extension will be documented in
   - Allow workspace level configuration of log code prefix using vscode command palate
 - 0.2.1
   - Add support for `error("` pattern for python
+- 0.2.2
+  - Fix opening and closing angle brackets ('<>')
+  - Change unknown prefix from `<UNK>` to `$UNK$` to make it easy to replace after `<` fix
