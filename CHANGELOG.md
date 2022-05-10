@@ -20,3 +20,5 @@ All notable changes to the "alog-code-generator" extension will be documented in
 - 0.2.2
   - Fix opening and closing angle brackets ('<>')
   - Change unknown prefix from `<UNK>` to `$UNK$` to make it easy to replace after `<` fix
+- 0.2.3
+  - Fix digit count. Change from 6 to 8

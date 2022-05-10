@@ -9,7 +9,7 @@ import * as constants from './constants';
 const vscodeConfig = getVSCodeConfig();
 
 // NOTE: Can be added to global config
-const digitCount = 6;
+const digitCount = 8;
 
 let logCodePrefixDefault: string = "$UNK$";
 const logCodePrefixKey: string = "logCodePrefix";
