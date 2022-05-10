@@ -2,7 +2,7 @@
   "name": "alog-code-generator",
   "displayName": "Alog-Code Generator",
   "description": "Automatic log code generator",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "publisher": "Gaurav Kumbhat",
   "engines": {
     "vscode": "^1.65.0"
