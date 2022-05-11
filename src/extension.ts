@@ -3,7 +3,7 @@
 import * as vscode from 'vscode';
 import { errorFirstRegex, logFirstRegex, prefixCheckRegex } from "./regex/python";
 import { getVSCodeConfig } from "./config";
-// import { Trigger } from "./trigger_enum";
+import { Trigger } from "./trigger_enum";
 import * as constants from './constants';
 
 const vscodeConfig = getVSCodeConfig();
@@ -40,12 +40,12 @@ export function activate(context: vscode.ExtensionContext): void {
 	registerCommandNice("extension.log_code",  () => {insertLogCode(context)});
 
 	// NOTE: Auto suggest functinality will be in phase 2
-	// let autoSuggestor = vscode.languages.registerCompletionItemProvider(
-	// 	'python',
-	// 	{ provideCompletionItems },
-	// 	Trigger.DOT
-	// );
-	// context.subscriptions.push(disposable, autoSuggestor);
+	let autoSuggestor = vscode.languages.registerCompletionItemProvider(
+		'python',
+		{ provideCompletionItems },
+		Trigger.START_ANGLE
+	);
+	context.subscriptions.push(autoSuggestor);
 
 }
 
@@ -61,30 +61,30 @@ async function provideCompletionItems(
 	token?: vscode.CancellationToken,
 	context?: vscode.CompletionContext) {
 
-	const offset = document.offsetAt(position);
-	const beforeStartOffset = Math.max(0, offset - vscodeConfig.charLimit);
-	const afterEndOffset = offset + 5;
-	const beforeStartPosition = document.positionAt(beforeStartOffset);
-	const afterEndPosition = document.positionAt(afterEndOffset);
-	const beforeStartPositionText = document.getText(
-		new vscode.Range(beforeStartPosition, position)
-	);
-	const afterEndPositionText: string = document.getText(
-		new vscode.Range(position, afterEndPosition)
-	);
+	// const offset = document.offsetAt(position);
+	// const beforeStartOffset = Math.max(0, offset - vscodeConfig.charLimit);
+	// const afterEndOffset = offset + 5;
+	// const beforeStartPosition = document.positionAt(beforeStartOffset);
+	// const afterEndPosition = document.positionAt(afterEndOffset);
+	// const beforeStartPositionText = document.getText(
+	// 	new vscode.Range(beforeStartPosition, position)
+	// );
+	// const afterEndPositionText: string = document.getText(
+	// 	new vscode.Range(position, afterEndPosition)
+	// );
 
-	vscode.window.showInformationMessage(`reached here: ${constants.pythonLogKeywords}`);
+	// console.log(`${constants.pythonLogKeywords}`)
 
-	const logCodeNumber = generate(digitCount);
+	// const logCodeNumber = generate(digitCount);
 
-	vscode.window.showInformationMessage(`${afterEndPositionText}`);
-	if (constants.pythonLogKeywords.has(afterEndPositionText)) {
-		vscode.window.showInformationMessage(`afterEndPositionText: ${afterEndPositionText}`);
-		const suffix = constants.pythonLogKeywords.get(afterEndPositionText);
-		const suggestedLogCode = logCodeNumber + suffix;
-		const completionItem = new vscode.CompletionItem(suggestedLogCode);
-		return new vscode.CompletionList([completionItem], true);
-	}
+	// vscode.window.showInformationMessage(`${afterEndPositionText}`);
+	// if (constants.pythonLogKeywords.has(afterEndPositionText)) {
+	// 	vscode.window.showInformationMessage(`afterEndPositionText: ${beforeStartPositionText}`);
+	// 	const suffix = constants.pythonLogKeywords.get(afterEndPositionText);
+	// 	const suggestedLogCode = logCodeNumber + suffix;
+	// 	const completionItem = new vscode.CompletionItem(suggestedLogCode);
+	// 	return new vscode.CompletionList([completionItem], true);
+	// }
 	return new vscode.CompletionList([], true);
 }
 

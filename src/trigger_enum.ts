@@ -1,3 +1,3 @@
 export enum Trigger {
-	DOT = "."
+	START_ANGLE = "<"
 }
