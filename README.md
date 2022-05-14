@@ -57,9 +57,7 @@ coming soon.
 
 ## Release Notes
 
-### 0.0.1
-- Provides log code completion with press of `cmd+shift+a` command on mac and `ctrl+shift+a` on windows/linux
-- Automatic resolution of log level, based on the line being written.
+Refer to [changelog](CHANGELOG.md).
 
 -----------------------------------------------------------------------------------------------------------
 ## Following extension guidelines

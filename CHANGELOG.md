@@ -22,3 +22,7 @@ All notable changes to the "alog-code-generator" extension will be documented in
   - Change unknown prefix from `<UNK>` to `$UNK$` to make it easy to replace after `<` fix
 - 0.2.3
   - Fix digit count. Change from 6 to 8
+- 0.2.4
+  - Add missing warning level log mapping
+- 0.2.5
+  - Make regex to support single quote
