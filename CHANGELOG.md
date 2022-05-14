@@ -26,3 +26,7 @@ All notable changes to the "alog-code-generator" extension will be documented in
   - Add missing warning level log mapping
 - 0.2.5
   - Make regex to support single quote
+
+
+- 0.3.0
+  - Add support for auto complete
