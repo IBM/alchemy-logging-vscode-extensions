@@ -9,7 +9,7 @@ import { posix } from 'path';
 
 const vscodeConfig = getVSCodeConfig();
 
-// NOTE: Can be added to global config
+// TODO: Add this to global config
 const digitCount = 8;
 
 let logCodePrefixDefault: string = "$UNK$";
@@ -50,21 +50,21 @@ export function activate(context: vscode.ExtensionContext): void {
 
 }
 
-// this method is called when your extension is deactivated
-export function deactivate() {
-	// TODO: Cleanup state
- }
-
-// Log code generator function
+/**
+ * Function to generate log code for auto completion
+ * @param document: Active vscode document
+ * @param position: Position of the active character triggered by the trigger
+ * @param _token (Not used)
+ * @param _completionContext (Not used)
+ * @param extensionContext: Context of the active extension
+ * @returns vscode.CompletionList
+ */
 function provideCompletionItems(
 	document: vscode.TextDocument,
 	position: vscode.Position,
 	_token?: vscode.CancellationToken,
 	_completionContext?: vscode.CompletionContext,
 	extensionContext?: vscode.ExtensionContext) {
-
-	console.log(`position line: ${position.line}`)
-	console.log(`line at: ${document.lineAt(position.line).text}`)
 
 	let logCodeSuffix: string | undefined;
 
@@ -96,7 +96,6 @@ function provideCompletionItems(
 	return new vscode.CompletionList([], true);
 }
 
-// Log code insertion
 /**
  * Function to insert appropriate log code at the active cursor position
  * if applicable, i.e if the code determines that this is a log line being written
