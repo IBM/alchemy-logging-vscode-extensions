@@ -5,12 +5,8 @@ import { errorFirstRegex, logFirstRegex, prefixCheckRegex } from "./regex/python
 import { getVSCodeConfig } from "./config";
 import { Trigger } from "./trigger_enum";
 import * as constants from './constants';
-import { posix } from 'path';
 
 const vscodeConfig = getVSCodeConfig();
-
-// TODO: Add this to global config
-const digitCount = 8;
 
 let logCodePrefixDefault: string = "$UNK$";
 const logCodePrefixKey: string = "logCodePrefix";
@@ -77,7 +73,7 @@ function provideCompletionItems(
 		const matchedCapture = levelPatternMatch[1];
 		logCodeSuffix = constants.pythonLogKeywords.get(matchedCapture);
 		if (logCodeSuffix !== undefined) {
-			const logCodeNumber = generate(digitCount);
+			const logCodeNumber = generate(constants.digitCount);
 				// NOTE: There is a > suffix added in below line
 				let suggestedLogCode = `${logCodeNumber + logCodeSuffix}>`;
 
@@ -120,7 +116,7 @@ async function insertLogCode(context: vscode.ExtensionContext): Promise<void> {
 			const matchedCapture = levelPatternMatch[1];
 			logCodeSuffix = constants.pythonLogKeywords.get(matchedCapture);
 			if (logCodeSuffix !== undefined) {
-				const logCodeNumber = generate(digitCount);
+				const logCodeNumber = generate(constants.digitCount);
 				// NOTE: There is a > suffix added in below line
 				let suggestedLogCode = `${logCodeNumber + logCodeSuffix}>`;
 
