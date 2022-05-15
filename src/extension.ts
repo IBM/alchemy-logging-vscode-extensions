@@ -29,7 +29,7 @@ export function activate(context: vscode.ExtensionContext): void {
 	// Get log code via command
 	registerCommandNice("extension.log_code",  () => {insertLogCode(context)});
 
-	// NOTE: Auto suggest functinality will be in phase 2
+	// Configure auto suggest / completion
 	let autoSuggestor = vscode.languages.registerCompletionItemProvider(
 		'python',
 		{
