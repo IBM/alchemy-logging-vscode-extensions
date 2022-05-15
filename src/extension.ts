@@ -64,7 +64,7 @@ function provideCompletionItems(
 
 	let logCodeSuffix: string | undefined;
 
-	const rawLineText: string = document.lineAt(position.line).text;
+	const rawLineText: string = document.lineAt(position.line).text.trimStart();;
 
 	const levelPatternMatch: RegExpMatchArray | null =
 			errorFirstRegex.exec(rawLineText) || logFirstRegex.exec(rawLineText);
