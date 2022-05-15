@@ -4,6 +4,10 @@
   "description": "Automatic log code generator",
   "version": "0.3.0",
   "publisher": "Gaurav Kumbhat",
+  "repository": {
+    "type": "git",
+    "url": "https://github.ibm.com/Gaurav-Kumbhat/alog-extension.git"
+  },
   "engines": {
     "vscode": "^1.65.0"
   },

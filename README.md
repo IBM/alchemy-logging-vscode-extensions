@@ -49,7 +49,8 @@ coming soon.
     - vsce, short for "Visual Studio Code Extensions", is a command-line tool for packaging, publishing and managing VS Code extensions.
 2. Go to root directory of the extension: `cd alog-extension`
 3. Install package and depdendencies: `npm install`
-4. Create extension package: `vsce package`
+4. Create extension package: `vsce package --baseContentUrl https://github.ibm.com/Gaurav-Kumbhat/alog-extension`
+   1. We need to provide `--baseContentUrl` since we do not have it available in public github.
 
 ### Installation
 1. Open command menu: `Cmd+shift+p`
@@ -61,7 +62,7 @@ coming soon.
 
 ## Release Notes
 
-Refer to [changelog](CHANGELOG.md).
+Refer to [change logs](CHANGELOG.md)
 
 -----------------------------------------------------------------------------------------------------------
 ## Following extension guidelines
