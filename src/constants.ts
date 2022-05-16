@@ -1,4 +1,4 @@
-export let pythonLogKeywords: Map<string, string> = new Map([
+export const pythonLogKeywords: Map<string, string> = new Map([
     ['info', "I"],
     ["error", "E"],
     ["warn", "W"],
@@ -10,3 +10,6 @@ export let pythonLogKeywords: Map<string, string> = new Map([
     ["debug3", "D"],
     ["debug4", "D"]
 ]);
+
+// TODO: Add this to global config
+export const digitCount = 8;

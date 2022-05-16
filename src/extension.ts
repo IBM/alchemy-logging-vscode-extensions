@@ -3,13 +3,10 @@
 import * as vscode from 'vscode';
 import { errorFirstRegex, logFirstRegex, prefixCheckRegex } from "./regex/python";
 import { getVSCodeConfig } from "./config";
-// import { Trigger } from "./trigger_enum";
+import { Trigger } from "./trigger_enum";
 import * as constants from './constants';
 
 const vscodeConfig = getVSCodeConfig();
-
-// NOTE: Can be added to global config
-const digitCount = 8;
 
 let logCodePrefixDefault: string = "$UNK$";
 const logCodePrefixKey: string = "logCodePrefix";
@@ -26,69 +23,75 @@ export function activate(context: vscode.ExtensionContext): void {
 	  context.subscriptions.push(vscode.commands.registerCommand(commandId, run, [context]));
   }
 
-  // The command has been defined in the package.json file
-  // Now provide the implementation of the command with registerCommand
-  // The commandId parameter must match the command field in package.json
-	// registerCommandNice("alog-code-generator.log_code", () => {
-	// 	vscode.window.showInformationMessage("");
-	// });
-
-    // Configure log code prefix
-  	registerCommandNice("extension.config_log_code_prefix", () => {configLogCodePrefix(context)});
+	// Configure log code prefix
+	registerCommandNice("extension.config_log_code_prefix", () => {configLogCodePrefix(context)});
 
 	// Get log code via command
 	registerCommandNice("extension.log_code",  () => {insertLogCode(context)});
 
-	// NOTE: Auto suggest functinality will be in phase 2
-	// let autoSuggestor = vscode.languages.registerCompletionItemProvider(
-	// 	'python',
-	// 	{ provideCompletionItems },
-	// 	Trigger.DOT
-	// );
-	// context.subscriptions.push(disposable, autoSuggestor);
+	// Configure auto suggest / completion
+	let autoSuggestor = vscode.languages.registerCompletionItemProvider(
+		'python',
+		{
+			provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, completionContext: vscode.CompletionContext) {
+
+				return provideCompletionItems(document, position, token, completionContext, context);
+			}
+		},
+
+		Trigger.START_ANGLE
+	);
+
+	context.subscriptions.push(autoSuggestor);
 
 }
 
-// this method is called when your extension is deactivated
-export function deactivate() {
-	// TODO: Cleanup state
- }
-
-// Log code generator function
-async function provideCompletionItems(
+/**
+ * Function to generate log code for auto completion
+ * @param document: Active vscode document
+ * @param position: Position of the active character triggered by the trigger
+ * @param _token (Not used)
+ * @param _completionContext (Not used)
+ * @param extensionContext: Context of the active extension
+ * @returns vscode.CompletionList
+ */
+function provideCompletionItems(
 	document: vscode.TextDocument,
 	position: vscode.Position,
-	token?: vscode.CancellationToken,
-	context?: vscode.CompletionContext) {
+	_token?: vscode.CancellationToken,
+	_completionContext?: vscode.CompletionContext,
+	extensionContext?: vscode.ExtensionContext) {
 
-	const offset = document.offsetAt(position);
-	const beforeStartOffset = Math.max(0, offset - vscodeConfig.charLimit);
-	const afterEndOffset = offset + 5;
-	const beforeStartPosition = document.positionAt(beforeStartOffset);
-	const afterEndPosition = document.positionAt(afterEndOffset);
-	const beforeStartPositionText = document.getText(
-		new vscode.Range(beforeStartPosition, position)
-	);
-	const afterEndPositionText: string = document.getText(
-		new vscode.Range(position, afterEndPosition)
-	);
+	let logCodeSuffix: string | undefined;
 
-	vscode.window.showInformationMessage(`reached here: ${constants.pythonLogKeywords}`);
+	const rawLineText: string = document.lineAt(position.line).text.trimStart();;
 
-	const logCodeNumber = generate(digitCount);
+	const levelPatternMatch: RegExpMatchArray | null =
+			errorFirstRegex.exec(rawLineText) || logFirstRegex.exec(rawLineText);
 
-	vscode.window.showInformationMessage(`${afterEndPositionText}`);
-	if (constants.pythonLogKeywords.has(afterEndPositionText)) {
-		vscode.window.showInformationMessage(`afterEndPositionText: ${afterEndPositionText}`);
-		const suffix = constants.pythonLogKeywords.get(afterEndPositionText);
-		const suggestedLogCode = logCodeNumber + suffix;
-		const completionItem = new vscode.CompletionItem(suggestedLogCode);
-		return new vscode.CompletionList([completionItem], true);
+	if (levelPatternMatch !== null && levelPatternMatch?.length > 0 && extensionContext) {
+		const matchedCapture = levelPatternMatch[1];
+		logCodeSuffix = constants.pythonLogKeywords.get(matchedCapture);
+		if (logCodeSuffix !== undefined) {
+			const logCodeNumber = generate(constants.digitCount);
+				// NOTE: There is a > suffix added in below line
+				let suggestedLogCode = `${logCodeNumber + logCodeSuffix}>`;
+
+				// Prefix check not available here, since the trigger is <
+				let logCodePrefix = extensionContext.workspaceState.get(logCodePrefixKey);
+
+				// NOTE: < prefix already present
+				suggestedLogCode = `${logCodePrefix}${suggestedLogCode}`;
+				const codeCompletion = new vscode.CompletionItem(suggestedLogCode);
+
+				return new vscode.CompletionList([codeCompletion], true);
+
+		}
 	}
+
 	return new vscode.CompletionList([], true);
 }
 
-// Log code insertion
 /**
  * Function to insert appropriate log code at the active cursor position
  * if applicable, i.e if the code determines that this is a log line being written
@@ -97,15 +100,12 @@ async function provideCompletionItems(
 async function insertLogCode(context: vscode.ExtensionContext): Promise<void> {
 
 	const activeEditor = vscode.window.activeTextEditor;
-	const searchWindow = 10;
-	const startPosition: number = 0;
-	let lineNumber: number;
+
 	let rawLineText: string;
 	let activePosition: vscode.Position;
 	let logCodeSuffix: string | undefined;
 
 	if (activeEditor) {
-		lineNumber = activeEditor.selection.active.line;
 		activePosition = activeEditor.selection.active;
 		rawLineText = activeEditor.document.lineAt(activeEditor.selection.active.line).text.trimStart();
 
@@ -116,7 +116,7 @@ async function insertLogCode(context: vscode.ExtensionContext): Promise<void> {
 			const matchedCapture = levelPatternMatch[1];
 			logCodeSuffix = constants.pythonLogKeywords.get(matchedCapture);
 			if (logCodeSuffix !== undefined) {
-				const logCodeNumber = generate(digitCount);
+				const logCodeNumber = generate(constants.digitCount);
 				// NOTE: There is a > suffix added in below line
 				let suggestedLogCode = `${logCodeNumber + logCodeSuffix}>`;
 

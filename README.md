@@ -16,6 +16,9 @@ Alog code generator provides a vscode extension capability to automatically gene
 - This will automatically complete the log code along with the level suffix. (Check features, section below)
 - NOTE: This will also add prefix, if not entered by the user already. The prefix here refers to the 3 char library prefix that is standard convention in alog. If the log prefix is not configured, the log auto-completion will use `$UNK$` as the prefix.
 
+### Using auto complete feature
+- After typing usual log line, start your log code with `<` character. This will trigger auto-completion and extension will propose a log code with suffix
+- For selecting the log code, simply press `Enter`
 
 ## Features
 
@@ -25,6 +28,7 @@ Alog code generator provides a vscode extension capability to automatically gene
    2. `error.type_check` -> `E`
    3. `log.error` -> `E`
 3. Allow workspace level configuration of log code prefix using vscode command palate
+4. Provide auto complete suggestion for the log code, triggered by `<` character when writing the log line
 
 ## Requirements
 
@@ -45,7 +49,8 @@ coming soon.
     - vsce, short for "Visual Studio Code Extensions", is a command-line tool for packaging, publishing and managing VS Code extensions.
 2. Go to root directory of the extension: `cd alog-extension`
 3. Install package and depdendencies: `npm install`
-4. Create extension package: `vsce package`
+4. Create extension package: `vsce package --baseContentUrl https://github.ibm.com/Gaurav-Kumbhat/alog-extension`
+   1. We need to provide `--baseContentUrl` since we do not have it available in public github.
 
 ### Installation
 1. Open command menu: `Cmd+shift+p`
@@ -57,7 +62,7 @@ coming soon.
 
 ## Release Notes
 
-Refer to [changelog](CHANGELOG.md).
+Refer to [change logs](CHANGELOG.md)
 
 -----------------------------------------------------------------------------------------------------------
 ## Following extension guidelines
@@ -65,14 +70,6 @@ Refer to [changelog](CHANGELOG.md).
 Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
 
 * [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-**Note:** You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+CMD+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux) or `Cmd+Space` (macOS) to see a list of Markdown snippets
 
 ### References:
 - Package and Publishing: https://code.visualstudio.com/api/working-with-extensions/publishing-extension
