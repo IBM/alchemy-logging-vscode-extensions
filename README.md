@@ -45,7 +45,7 @@ coming soon.
 ## Release process
 
 ### Local
-1. Install `npm install -g vsce1`
+1. Install `npm install -g vsce`
     - vsce, short for "Visual Studio Code Extensions", is a command-line tool for packaging, publishing and managing VS Code extensions.
 2. Go to root directory of the extension: `cd alog-extension`
 3. Install package and depdendencies: `npm install`
