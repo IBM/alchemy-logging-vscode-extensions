@@ -11,6 +11,8 @@ const vscodeConfig = getVSCodeConfig();
 let logCodePrefixDefault: string = "$UNK$";
 const logCodePrefixKey: string = "logCodePrefix";
 
+const lineLookupLimit: number = 2;
+
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext): void {
@@ -63,36 +65,40 @@ function provideCompletionItems(
 	extensionContext?: vscode.ExtensionContext) {
 
 	let logCodeSuffix: string | undefined;
-	// NOTE: In order to support formatters, we are considering multiple lines here
-	const rawLineText: string = document.getText(
-		new vscode.Range(
-			new vscode.Position(position.line-1, 0),
-			position)
-		).trim();
 
 	// const rawLineText: string = document.lineAt(position.line).text.trimStart();
 
-	const levelPatternMatch: RegExpMatchArray | null =
+	// NOTE: In order to support formatters, we are considering multiple lines here
+	for (let lineCount=0; lineCount < lineLookupLimit; lineCount++) {
+		const rawLineText: string = document.getText(
+			new vscode.Range(
+				new vscode.Position(position.line-lineCount, 0),
+				position)
+		).trim();
+
+		const levelPatternMatch: RegExpMatchArray | null =
 			errorFirstRegex.exec(rawLineText) || logFirstRegex.exec(rawLineText);
 
-	if (levelPatternMatch !== null && levelPatternMatch?.length > 0 && extensionContext) {
-		const matchedCapture = levelPatternMatch[1];
-		logCodeSuffix = constants.pythonLogKeywords.get(matchedCapture);
-		if (logCodeSuffix !== undefined) {
-			const logCodeNumber = generate(constants.digitCount);
-				// NOTE: There is a > suffix added in below line
-				let suggestedLogCode = `${logCodeNumber + logCodeSuffix}>`;
+		if (levelPatternMatch !== null && levelPatternMatch?.length > 0 && extensionContext) {
+			const matchedCapture = levelPatternMatch[1];
+			logCodeSuffix = constants.pythonLogKeywords.get(matchedCapture);
+			if (logCodeSuffix !== undefined) {
+				const logCodeNumber = generate(constants.digitCount);
+					// NOTE: There is a > suffix added in below line
+					let suggestedLogCode = `${logCodeNumber + logCodeSuffix}>`;
 
-				// Prefix check not available here, since the trigger is <
-				let logCodePrefix = extensionContext.workspaceState.get(logCodePrefixKey);
+					// Prefix check not available here, since the trigger is <
+					let logCodePrefix = extensionContext.workspaceState.get(logCodePrefixKey);
 
-				// NOTE: < prefix already present
-				suggestedLogCode = `${logCodePrefix}${suggestedLogCode}`;
-				const codeCompletion = new vscode.CompletionItem(suggestedLogCode);
+					// NOTE: < prefix already present
+					suggestedLogCode = `${logCodePrefix}${suggestedLogCode}`;
+					const codeCompletion = new vscode.CompletionItem(suggestedLogCode);
 
-				return new vscode.CompletionList([codeCompletion], true);
+					return new vscode.CompletionList([codeCompletion], true);
 
+			}
 		}
+
 	}
 
 	return new vscode.CompletionList([], true);
@@ -114,36 +120,39 @@ async function insertLogCode(context: vscode.ExtensionContext): Promise<void> {
 	if (activeEditor) {
 		activePosition = activeEditor.selection.active;
 		// NOTE: In order to support formatters, we are considering multiple lines here
-		rawLineText = activeEditor.document.getText(
-			new vscode.Range(
-				new vscode.Position(activeEditor.selection.active.line - 1, 0),
-				activeEditor.selection.active)
-		).trim();
+		for (let lineCount=0; lineCount < lineLookupLimit; lineCount++) {
 
-		// rawLineText = activeEditor.document.lineAt(activeEditor.selection.active.line).text.trimStart();
+			rawLineText = activeEditor.document.getText(
+				new vscode.Range(
+					new vscode.Position(activeEditor.selection.active.line - lineCount, 0),
+					activeEditor.selection.active)
+			).trim();
 
-		const levelPatternMatch: RegExpMatchArray | null =
-			errorFirstRegex.exec(rawLineText) || logFirstRegex.exec(rawLineText);
+			// rawLineText = activeEditor.document.lineAt(activeEditor.selection.active.line).text.trimStart();
 
-		if (levelPatternMatch !== null && levelPatternMatch?.length > 0) {
-			const matchedCapture = levelPatternMatch[1];
-			logCodeSuffix = constants.pythonLogKeywords.get(matchedCapture);
-			if (logCodeSuffix !== undefined) {
-				const logCodeNumber = generate(constants.digitCount);
-				// NOTE: There is a > suffix added in below line
-				let suggestedLogCode = `${logCodeNumber + logCodeSuffix}>`;
+			const levelPatternMatch: RegExpMatchArray | null =
+				errorFirstRegex.exec(rawLineText) || logFirstRegex.exec(rawLineText);
 
-				let logCodePrefix: string | null | undefined = checkPrefixEntered(activeEditor, activePosition);
-				if (! logCodePrefix) {
-					// if prefix is not entered, lets add one from workspace state
-					logCodePrefix = context.workspaceState.get(logCodePrefixKey);
-					// NOTE: There is a < prefix added in below line
-					suggestedLogCode = `<${logCodePrefix}${suggestedLogCode}`;
+			if (levelPatternMatch !== null && levelPatternMatch?.length > 0) {
+				const matchedCapture = levelPatternMatch[1];
+				logCodeSuffix = constants.pythonLogKeywords.get(matchedCapture);
+				if (logCodeSuffix !== undefined) {
+					const logCodeNumber = generate(constants.digitCount);
+					// NOTE: There is a > suffix added in below line
+					let suggestedLogCode = `${logCodeNumber + logCodeSuffix}>`;
+
+					let logCodePrefix: string | null | undefined = checkPrefixEntered(activeEditor, activePosition);
+					if (! logCodePrefix) {
+						// if prefix is not entered, lets add one from workspace state
+						logCodePrefix = context.workspaceState.get(logCodePrefixKey);
+						// NOTE: There is a < prefix added in below line
+						suggestedLogCode = `<${logCodePrefix}${suggestedLogCode}`;
+					}
+
+					activeEditor.edit(editBuilder => {
+						editBuilder.insert(activePosition, suggestedLogCode)
+					})
 				}
-
-				activeEditor.edit(editBuilder => {
-					editBuilder.insert(activePosition, suggestedLogCode)
-				})
 			}
 		}
 	}
