@@ -63,8 +63,14 @@ function provideCompletionItems(
 	extensionContext?: vscode.ExtensionContext) {
 
 	let logCodeSuffix: string | undefined;
+	// NOTE: In order to support formatters, we are considering multiple lines here
+	const rawLineText: string = document.getText(
+		new vscode.Range(
+			new vscode.Position(position.line-1, 0),
+			position)
+		).trim();
 
-	const rawLineText: string = document.lineAt(position.line).text.trimStart();;
+	// const rawLineText: string = document.lineAt(position.line).text.trimStart();
 
 	const levelPatternMatch: RegExpMatchArray | null =
 			errorFirstRegex.exec(rawLineText) || logFirstRegex.exec(rawLineText);
@@ -107,7 +113,14 @@ async function insertLogCode(context: vscode.ExtensionContext): Promise<void> {
 
 	if (activeEditor) {
 		activePosition = activeEditor.selection.active;
-		rawLineText = activeEditor.document.lineAt(activeEditor.selection.active.line).text.trimStart();
+		// NOTE: In order to support formatters, we are considering multiple lines here
+		rawLineText = activeEditor.document.getText(
+			new vscode.Range(
+				new vscode.Position(activeEditor.selection.active.line - 1, 0),
+				activeEditor.selection.active)
+		).trim();
+
+		// rawLineText = activeEditor.document.lineAt(activeEditor.selection.active.line).text.trimStart();
 
 		const levelPatternMatch: RegExpMatchArray | null =
 			errorFirstRegex.exec(rawLineText) || logFirstRegex.exec(rawLineText);

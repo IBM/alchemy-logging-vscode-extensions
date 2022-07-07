@@ -6,12 +6,14 @@
  * ? matches the previous token between 0 and 1 times, as many times as possible, giving back as needed (greedy)
  * . matches any character (except for line terminators)
  * * matches the previous token between zero and unlimited times, as many times as possible, giving back as needed (greedy)
+ * Match a single character present in the list below [\n\s]
+ * * matches the previous token between zero and unlimited times
  * Match one of quotes present in the list [\"\']
  * < matches the character <
  * ? matches the previous token between 0 and 1 times
  * Non-capturing group (?:[A-Z]?|[A-Z]{3})
  */
-export const errorFirstRegex = new RegExp('(error)\.?.*\\([\"\']<?(?:[A-Z]?|[A-Z]{3})', 'gs');
+export const errorFirstRegex = new RegExp('(error)\.?.*\\([\\n\\s]*[\"\']<?(?:[A-Z]?|[A-Z]{3})', 'g');
 
 /**
  * Regex Description:
@@ -26,11 +28,13 @@ export const errorFirstRegex = new RegExp('(error)\.?.*\\([\"\']<?(?:[A-Z]?|[A-Z
  *     ? matches the previous token between 0 and 1 times
  *     1-5 matches a single character in the range between 1 and 5 times
  * \( matches the character ( literally
+ * Match a single character present in the list below [\n\s]
+ * * matches the previous token between zero and unlimited times
  * Match one of quotes present in the list [\"\']
  * < matches the character <
  */
 
-export const logFirstRegex = new RegExp("^log\.([a-z]{4,7}[1-5]?)\\([\"\']<?(?:[A-Z]?|[A-Z]{3})", "gs");
+export const logFirstRegex = new RegExp("^log\.([a-z]{4,7}[1-5]?)\\([\\n\\s]*[\"\']<?(?:[A-Z]?|[A-Z]{3})", "gs");
 
 /**
  * Regex Description:
