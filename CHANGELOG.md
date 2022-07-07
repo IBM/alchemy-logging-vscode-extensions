@@ -30,3 +30,5 @@ All notable changes to the "alog-code-generator" extension will be documented in
 
 - 0.3.0
   - Add support for auto complete
+- 0.3.1
+  - Add support for 2 line lookup for suggestion and command based log code generation
