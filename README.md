@@ -1,4 +1,4 @@
-# Alog log-code generator
+# Alchemy logging vscode extensions
 
 Alog code generator provides a vscode extension capability to automatically generate, suggest / insert log code as used by [alchemy-logging](https://github.com/IBM/alchemy-logging) library.
 
