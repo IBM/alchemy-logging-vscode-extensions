@@ -1,18 +1,23 @@
 {
   "name": "alog-code-generator",
   "displayName": "Alchemy logging extension",
-  "description": "Automatic log code generator for Alchemy logging",
+  "description": "Automatic log code generator for alchemy logging (alog): https://github.com/IBM/alchemy-logging",
   "version": "0.3.2",
   "publisher": "Gaurav-Kumbhat",
   "repository": {
     "type": "git",
     "url": "https://github.com/IBM/alchemy-logging-vscode-extensions.git"
   },
+  "license": "SEE LICENSE IN LICENSE",
   "engines": {
     "vscode": "^1.65.0"
   },
   "categories": [
     "Other"
+  ],
+  "keywords": [
+    "alog",
+    "alchemy logging"
   ],
   "activationEvents": [
     "onLanguage:python"
