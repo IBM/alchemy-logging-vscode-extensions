@@ -1,9 +1,9 @@
 {
   "name": "alog-code-generator",
-  "displayName": "Alchemy logging vscode extensions",
+  "displayName": "Alchemy logging extension",
   "description": "Automatic log code generator",
   "version": "0.3.2",
-  "publisher": "Gaurav Kumbhat",
+  "publisher": "Gaurav-Kumbhat",
   "repository": {
     "type": "git",
     "url": "https://github.com/IBM/alchemy-logging-vscode-extensions.git"
