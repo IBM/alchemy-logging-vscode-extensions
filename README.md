@@ -49,10 +49,17 @@ coming soon.
     - vsce, short for "Visual Studio Code Extensions", is a command-line tool for packaging, publishing and managing VS Code extensions.
 2. Go to root directory of the extension: `cd alog-extension`
 3. Install package and depdendencies: `npm install`
-4. Create extension package: `vsce package --baseContentUrl https://github.ibm.com/Gaurav-Kumbhat/alog-extension`
+4. Create extension package: `vsce package --baseContentUrl https://github.com/IBM/alchemy-logging-vscode-extensions.git`
    1. We need to provide `--baseContentUrl` since we do not have it available in public github.
 
 ### Installation
+#### Extension Marketplace
+1. Open command menu: `Cmd+shift+p`
+2. Select `Extension: Install Extensions`
+3. Search for `Alchemy logging`
+4. Click on `Install`
+
+#### Local Build
 1. Open command menu: `Cmd+shift+p`
 2. Select `Extension: Install Extensions`
 3. On the left hand side extension panel, click on three horizontal dots, `...`
