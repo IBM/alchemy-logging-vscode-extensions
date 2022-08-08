@@ -1,5 +1,5 @@
 {
-  "name": "alchemy-logging-extension",
+  "name": "alog-code-generator",
   "displayName": "Alchemy logging extension",
   "description": "Automatic log code generator for alchemy logging (alog): https://github.com/IBM/alchemy-logging",
   "version": "0.3.3",
