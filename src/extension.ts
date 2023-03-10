@@ -181,7 +181,7 @@ async function insertLogCode(context: vscode.ExtensionContext): Promise<void> {
 }
 
 /**
- * Function to take log code prefix as an input from user and
+ * Function to take logger variable name as an input from user and
  * save it in workspaceState
  * @param vscode.ExtensionContext
  */
