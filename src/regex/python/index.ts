@@ -1,3 +1,6 @@
+import * as vscode from "vscode";
+
+export const defaultLogFirstNames = ["log", "LOGGER"];
 
 /**
  * Regex Description:
@@ -34,7 +37,10 @@ export const errorFirstRegex = new RegExp('(error)\.?.*\\([\\n\\s]*[\"\']<?(?:[A
  * < matches the character <
  */
 
-export const logFirstRegex = new RegExp("^log\.([a-z]{4,7}[1-5]?)\\([\\n\\s]*[\"\']<?(?:[A-Z]?|[A-Z]{3})", "gs");
+export function getLogFirstRegex(varNameList: string[]): RegExp {
+    const varNameStr = varNameList.join("|");
+    return new RegExp(`^(?:${varNameStr})\.([a-z]{4,7}[1-5]?)\\([\\n\\s]*[\"\']<?(?:[A-Z]?|[A-Z]{3})`, "gs");
+}
 
 /**
  * Regex Description:

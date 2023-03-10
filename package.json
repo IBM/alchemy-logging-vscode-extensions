@@ -27,8 +27,13 @@
     "commands": [
       {
         "command": "extension.config_log_code_prefix",
-        "title": "Configure Alog Code Generator - Log Prefix"
+        "title": "Configure Alog Code Generator - Log prefix"
+      },
+      {
+        "command": "extension.config_log_varname",
+        "title": "Configure Alog Code Generator - Log variable name"
       }
+
     ],
     "keybindings": [
       {
