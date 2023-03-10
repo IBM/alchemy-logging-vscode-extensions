@@ -2,7 +2,7 @@
   "name": "alog-code-generator",
   "displayName": "Alchemy logging extension",
   "description": "Automatic log code generator for alchemy logging (alog): https://github.com/IBM/alchemy-logging",
-  "version": "0.3.3",
+  "version": "0.4.0",
   "publisher": "Gaurav-Kumbhat",
   "repository": {
     "type": "git",
@@ -27,8 +27,13 @@
     "commands": [
       {
         "command": "extension.config_log_code_prefix",
-        "title": "Configure Alog Code Generator - Log Prefix"
+        "title": "Configure Alog Code Generator - Log prefix"
+      },
+      {
+        "command": "extension.config_log_varname",
+        "title": "Configure Alog Code Generator - Log variable name"
       }
+
     ],
     "keybindings": [
       {

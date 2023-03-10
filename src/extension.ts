@@ -1,14 +1,14 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import { errorFirstRegex, logFirstRegex, prefixCheckRegex } from "./regex/python";
+import { defaultLogFirstNames, errorFirstRegex, getLogFirstRegex, prefixCheckRegex } from "./regex/python";
 import { getVSCodeConfig } from "./config";
 import { Trigger } from "./trigger_enum";
 import * as constants from './constants';
 
 const vscodeConfig = getVSCodeConfig();
 
-let logCodePrefixDefault: string = "$UNK$";
+const logCodePrefixDefault: string = "$UNK$";
 const logCodePrefixKey: string = "logCodePrefix";
 
 const lineLookupLimit: number = 2;
@@ -20,6 +20,7 @@ export function activate(context: vscode.ExtensionContext): void {
   // As soon as the extension is activated, configure the workspace state
   // with default logCodePrefix
   context.workspaceState.update('logCodePrefix', logCodePrefixDefault);
+  context.workspaceState.update('logVariableNames', defaultLogFirstNames);
 
   function registerCommandNice(commandId: string, run: any, ): void {
 	  context.subscriptions.push(vscode.commands.registerCommand(commandId, run, [context]));
@@ -28,16 +29,23 @@ export function activate(context: vscode.ExtensionContext): void {
 	// Configure log code prefix
 	registerCommandNice("extension.config_log_code_prefix", () => {configLogCodePrefix(context)});
 
+	// Configure logger variable name
+	registerCommandNice("extension.config_log_varname", () => {configLoggerVarName(context)});
+
 	// Get log code via command
 	registerCommandNice("extension.log_code",  () => {insertLogCode(context)});
 
 	// Configure auto suggest / completion
-	let autoSuggestor = vscode.languages.registerCompletionItemProvider(
+	const autoSuggestor = vscode.languages.registerCompletionItemProvider(
 		'python',
 		{
-			provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, completionContext: vscode.CompletionContext) {
+			provideCompletionItems(
+				document: vscode.TextDocument,
+				position: vscode.Position,
+				token: vscode.CancellationToken,
+				completionContext: vscode.CompletionContext) {
 
-				return provideCompletionItems(document, position, token, completionContext, context);
+				return provideCompletionItems(document, position, context, token, completionContext);
 			}
 		},
 
@@ -52,19 +60,21 @@ export function activate(context: vscode.ExtensionContext): void {
  * Function to generate log code for auto completion
  * @param document: Active vscode document
  * @param position: Position of the active character triggered by the trigger
+ * @param extensionContext: Context of the active extension
  * @param _token (Not used)
  * @param _completionContext (Not used)
- * @param extensionContext: Context of the active extension
  * @returns vscode.CompletionList
  */
 function provideCompletionItems(
 	document: vscode.TextDocument,
 	position: vscode.Position,
+	extensionContext: vscode.ExtensionContext,
 	_token?: vscode.CancellationToken,
-	_completionContext?: vscode.CompletionContext,
-	extensionContext?: vscode.ExtensionContext) {
+	_completionContext?: vscode.CompletionContext) {
 
 	let logCodeSuffix: string | undefined;
+
+	const logVarNames: string[] = extensionContext.workspaceState.get('logVariableNames', defaultLogFirstNames);
 
 	// const rawLineText: string = document.lineAt(position.line).text.trimStart();
 
@@ -77,10 +87,11 @@ function provideCompletionItems(
 		).trim();
 
 		const levelPatternMatch: RegExpMatchArray | null =
-			errorFirstRegex.exec(rawLineText) || logFirstRegex.exec(rawLineText);
+			errorFirstRegex.exec(rawLineText) || getLogFirstRegex(logVarNames).exec(rawLineText);
 
 		if (levelPatternMatch !== null && levelPatternMatch?.length > 0 && extensionContext) {
 			const matchedCapture = levelPatternMatch[1];
+
 			logCodeSuffix = constants.pythonLogKeywords.get(matchedCapture);
 			if (logCodeSuffix !== undefined) {
 				const logCodeNumber = generate(constants.digitCount);
@@ -88,7 +99,7 @@ function provideCompletionItems(
 					let suggestedLogCode = `${logCodeNumber + logCodeSuffix}>`;
 
 					// Prefix check not available here, since the trigger is <
-					let logCodePrefix = extensionContext.workspaceState.get(logCodePrefixKey);
+					const logCodePrefix = extensionContext.workspaceState.get(logCodePrefixKey);
 
 					// NOTE: < prefix already present
 					suggestedLogCode = `${logCodePrefix}${suggestedLogCode}`;
@@ -117,6 +128,8 @@ async function insertLogCode(context: vscode.ExtensionContext): Promise<void> {
 	let activePosition: vscode.Position;
 	let logCodeSuffix: string | undefined;
 
+	const logVarNames: string[] = context.workspaceState.get('logVariableNames', defaultLogFirstNames);
+
 	if (activeEditor) {
 		activePosition = activeEditor.selection.active;
 		// NOTE: In order to support formatters, we are considering multiple lines here
@@ -131,7 +144,7 @@ async function insertLogCode(context: vscode.ExtensionContext): Promise<void> {
 			// rawLineText = activeEditor.document.lineAt(activeEditor.selection.active.line).text.trimStart();
 
 			const levelPatternMatch: RegExpMatchArray | null =
-				errorFirstRegex.exec(rawLineText) || logFirstRegex.exec(rawLineText);
+				errorFirstRegex.exec(rawLineText) || getLogFirstRegex(logVarNames).exec(rawLineText);
 
 			if (levelPatternMatch !== null && levelPatternMatch?.length > 0) {
 				const matchedCapture = levelPatternMatch[1];
@@ -164,7 +177,16 @@ async function insertLogCode(context: vscode.ExtensionContext): Promise<void> {
  * @param vscode.ExtensionContext
  */
  async function configLogCodePrefix(context: vscode.ExtensionContext): Promise<void> {
-	await showInputBox(context);
+	await setCodePrefix(context);
+}
+
+/**
+ * Function to take logger variable name as an input from user and
+ * save it in workspaceState
+ * @param vscode.ExtensionContext
+ */
+async function configLoggerVarName(context: vscode.ExtensionContext): Promise<void> {
+	await setVarName(context);
 }
 
 // ***************************** Utility Functions *****************************
@@ -223,7 +245,7 @@ function generate(n: number): string {
 /**
  * Shows an input box using window.showInputBox().
  */
- export async function showInputBox(context: vscode.ExtensionContext) {
+ export async function setCodePrefix(context: vscode.ExtensionContext) {
 
 	const errorMessage: string = 'Incorrect length. The prefix should be of 3 characters!';
 	const result: string | undefined = await vscode.window.showInputBox({
@@ -231,7 +253,7 @@ function generate(n: number): string {
 		placeHolder: 'For example: ABC',
 		validateInput: text => {
 			// vscode.window.showInformationMessage(`Validating: ${text}`);
-			return text.length != 3 ? errorMessage : null;
+			return text.length !== 3 ? errorMessage : null;
 		}
 	});
 	// Store the configured value in workspace state
@@ -240,4 +262,24 @@ function generate(n: number): string {
 	}
 
 	vscode.window.showInformationMessage(`Configured '${result}' as log code prefix for this project!`);
+}
+
+/**
+ * Shows an input box using window.showInputBox(). and stores list of variable names
+ */
+export async function setVarName(context: vscode.ExtensionContext) {
+
+	// Get existing value from workspaceState
+	const existingValues: string[]  = context.workspaceState.get('logVariableNames', defaultLogFirstNames);
+	const result: string | undefined = await vscode.window.showInputBox({
+		value: existingValues.toString(),
+		placeHolder: 'LOGGER,log',
+	});
+	// Store the configured value in workspace state
+	if (result) {
+		const newValues = result.split(',');
+		context.workspaceState.update('logVariableNames', newValues);
+	}
+
+	vscode.window.showInformationMessage(`Configured '${result}' as variable names for this project!`);
 }

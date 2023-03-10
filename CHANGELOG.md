@@ -36,3 +36,5 @@ All notable changes to the "alog-code-generator" extension will be documented in
   - Fix issue with 2 line lookup where code suffix suggestion based on 1st line were possible
 - 0.3.3
   - Security updates
+- 0.4.0
+  - Make logger variable name configurable by `Configure Alog Code Generator - Log variable name` command
